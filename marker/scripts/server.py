@@ -81,6 +81,136 @@ class CommonParams(BaseModel):
             description="The format to output the text in.  Can be 'markdown', 'json', or 'html'.  Defaults to 'markdown'."
         ),
     ] = "markdown"
+    output_dir: Annotated[
+        Optional[str],
+        Field(
+            description="Directory where output files will be saved. Defaults to the value specified in settings.OUTPUT_DIR."
+        ),
+    ] = None
+    use_llm: Annotated[
+        bool,
+        Field(
+            description="Uses an LLM to improve accuracy. You will need to configure the LLM backend."
+        ),
+    ] = False
+    format_lines: Annotated[
+        bool,
+        Field(
+            description="Reformat all lines using a local OCR model (inline math, underlines, bold, etc.). This will give very good quality math output."
+        ),
+    ] = False
+    block_correction_prompt: Annotated[
+        str,
+        Field(
+            description="if LLM mode is active, an optional prompt that will be used to correct the output of marker. This is useful for custom formatting or logic that you want to apply to the output."
+        ),
+    ] = None
+    strip_existing_ocr: Annotated[
+        bool,
+        "Remove all existing OCR text in the document and re-OCR with surya.",
+    ] = False
+    redo_inline_math: Annotated[
+        bool,
+        "If you want the absolute highest quality inline math conversion, use this along with --use_llm.",
+    ] = False
+    disable_image_extraction: Annotated[
+        bool,
+        "Don't extract images from the PDF. If you also specify --use_llm, then images will be replaced with a description.",
+    ] = False
+    debug: Annotated[
+        bool,
+        "Enable debug mode for additional logging and diagnostic information.",
+    ] = False
+    processors: Annotated[
+        str,
+        Field(
+            description="Override the default processors by providing their full module paths, separated by commas. Example: --processors 'module1.processor1,module2.processor2'."
+        ),
+    ] = None
+    config_json: Annotated[
+        str,
+        Field(
+            description="Path to a JSON configuration file containing additional settings."
+        ),
+    ] = None
+    converter_cls: Annotated[
+        str,
+        Field(
+            description="One of marker.converters.pdf.PdfConverter (default) or marker.converters.table.TableConverter. The PdfConverter will convert the whole PDF, the TableConverter will only extract and convert tables."
+        ),
+    ] = None
+    llm_service: Annotated[
+        str,
+        Field(
+            description="Which llm service to use if --use_llm is passed. This defaults to marker.services.gemini.GoogleGeminiService."
+        ),
+    ] = None
+    gemini_api_key: Annotated[
+        str,
+        Field(
+            description="this will use the Gemini developer API by default."
+        ),
+    ] = None
+    vertex_project_id: Annotated[
+        str,
+        Field(
+            description="this will use vertex, which can be more reliable, To use it, set --llm_service=marker.services.vertex.GoogleVertexService."
+        ),
+    ] = None
+    ollama_base_url: Annotated[
+        str,
+        Field(
+            description="this will use local models, used with ollama_model, To use it, set --llm_service=marker.services.ollama.OllamaService."
+        ),
+    ] = None
+    ollama_model: Annotated[
+        str,
+        Field(
+            description="this will use local models, used with ollama_base_url, To use it, set --llm_service=marker.services.ollama.OllamaService."
+        ),
+    ] = None
+    claude_api_key: Annotated[
+        str,
+        Field(
+            description="this will use the anthropic API. You can configure --claude_api_key, and --claude_model_name. To use it, set --llm_service=marker.services.claude.ClaudeService."
+        ),
+    ] = None
+    claude_model_name: Annotated[
+        str,
+        Field(
+            description="this will use the anthropic API. You can configure --claude_api_key, and --claude_model_name. To use it, set --llm_service=marker.services.claude.ClaudeService."
+        ),
+    ] = None
+    openai_api_key: Annotated[
+        str,
+        Field(
+            description="this supports any openai-like endpoint. You can configure --openai_api_key, --openai_model, and --openai_base_url. To use it, set --llm_service=marker.services.openai.OpenAIService."
+        ),
+    ] = None
+    openai_model: Annotated[
+        str,
+        Field(
+            description="this supports any openai-like endpoint. You can configure --openai_api_key, --openai_model, and --openai_base_url. To use it, set --llm_service=marker.services.openai.OpenAIService."
+        ),
+    ] = None
+    azure_endpoint: Annotated[
+        str,
+        Field(
+            description="this uses the Azure OpenAI service. You can configure --azure_endpoint, --azure_api_key, and --deployment_name. To use it, set --llm_service=marker.services.azure_openai.AzureOpenAIService."
+        ),
+    ] = None
+    azure_api_key: Annotated[
+        str,
+        Field(
+            description="this uses the Azure OpenAI service. You can configure --azure_endpoint, --azure_api_key, and --deployment_name. To use it, set --llm_service=marker.services.azure_openai.AzureOpenAIService."
+        ),
+    ] = None
+    deployment_name: Annotated[
+        str,
+        Field(
+            description="this uses the Azure OpenAI service. You can configure --azure_endpoint, --azure_api_key, and --deployment_name. To use it, set --llm_service=marker.services.azure_openai.AzureOpenAIService."
+        ),
+    ] = None
 
 
 async def _convert_pdf(params: CommonParams):
@@ -141,6 +271,7 @@ async def convert_pdf_upload(
     file: UploadFile = File(
         ..., description="The PDF file to convert.", media_type="application/pdf"
     ),
+    **extends
 ):
     upload_path = os.path.join(UPLOAD_DIRECTORY, file.filename)
     with open(upload_path, "wb+") as upload_file:
@@ -153,6 +284,7 @@ async def convert_pdf_upload(
         force_ocr=force_ocr,
         paginate_output=paginate_output,
         output_format=output_format,
+        **extends
     )
     results = await _convert_pdf(params)
     os.remove(upload_path)
