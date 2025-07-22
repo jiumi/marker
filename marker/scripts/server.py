@@ -55,7 +55,7 @@ async def root():
 class CommonParams(BaseModel):
     filepath: Annotated[
         Optional[str], Field(description="The path to the PDF file to convert.")
-    ]
+    ] = None
     page_range: Annotated[
         Optional[str],
         Field(
