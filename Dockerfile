@@ -1,13 +1,15 @@
 FROM python:3.10-slim as builder
 
-RUN echo "Types: deb\nURIs: https://mirrors.tuna.tsinghua.edu.cn/debian\nSuites: bookworm bookworm-updates\nComponents: main contrib non-free\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n\nTypes: deb\nURIs: https://mirrors.tuna.tsinghua.edu.cn/debian-security\nSuites: bookworm-security\nComponents: main contrib non-free\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg" > /etc/apt/sources.list.d/debian.sources
-RUN apt-get update && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN echo "deb https://mirrors.aliyun.com/debian/ bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/debian/ bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/debian/ bookworm-backports main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.aliyun.com/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
 
 RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple && \
     pip config set global.extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
     pip config set install.trusted-host "pypi.tuna.tsinghua.edu.cn mirrors.aliyun.com"
 
-RUN pip install --user --no-cache-dir -U marker-pdf uvicorn fastapi python-multipart
+RUN pip install --user --no-cache-dir marker-pdf uvicorn fastapi python-multipart
 
 FROM python:3.10-slim
 
