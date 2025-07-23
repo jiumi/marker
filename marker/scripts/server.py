@@ -289,7 +289,7 @@ async def _convert_pdf(params: CommonParams):
         config_parser = ConfigParser(options)
         config_dict = config_parser.generate_config_dict()
         # The number of workers to use for pdftext default is 4
-        config_dict["pdftext_workers"] = 4
+        config_dict["pdftext_workers"] = int(os.getenv('WORKER_NUM', '4'))
         converter_cls = PdfConverter
         converter = converter_cls(
             config=config_dict,
