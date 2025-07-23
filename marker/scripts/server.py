@@ -193,6 +193,12 @@ class CommonParams(BaseModel):
             description="this supports any openai-like endpoint. You can configure --openai_api_key, --openai_model, and --openai_base_url. To use it, set --llm_service=marker.services.openai.OpenAIService."
         ),
     ] = None
+    openai_base_url: Annotated[
+        Optional[str],
+        Field(
+            description="this supports any openai-like endpoint. You can configure --openai_api_key, --openai_model, and --openai_base_url. To use it, set --llm_service=marker.services.openai.OpenAIService."
+        ),
+    ] = None
     azure_endpoint: Annotated[
         Optional[str],
         Field(
@@ -238,6 +244,7 @@ class CommonParams(BaseModel):
                 claude_model_name: Optional[str] = Form(default=None),
                 openai_api_key: Optional[str] = Form(default=None),
                 openai_model: Optional[str] = Form(default=None),
+                openai_base_url: Optional[str] = Form(default=None),
                 azure_endpoint: Optional[str] = Form(default=None),
                 azure_api_key: Optional[str] = Form(default=None),
                 deployment_name: Optional[str] = Form(default=None)):
@@ -266,6 +273,7 @@ class CommonParams(BaseModel):
             claude_model_name=claude_model_name,
             openai_api_key=openai_api_key,
             openai_model=openai_model,
+            openai_base_url=openai_base_url,
             azure_endpoint=azure_endpoint,
             azure_api_key=azure_api_key,
             deployment_name=deployment_name
@@ -280,7 +288,8 @@ async def _convert_pdf(params: CommonParams):
         options = params.model_dump()
         config_parser = ConfigParser(options)
         config_dict = config_parser.generate_config_dict()
-        config_dict["pdftext_workers"] = 1
+        # The number of workers to use for pdftext default is 4
+        config_dict["pdftext_workers"] = 4
         converter_cls = PdfConverter
         converter = converter_cls(
             config=config_dict,
