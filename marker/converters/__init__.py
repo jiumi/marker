@@ -3,11 +3,13 @@ from typing import Optional, List, Type
 
 from pydantic import BaseModel
 
+from marker.logger import get_logger
 from marker.processors import BaseProcessor
 from marker.processors.llm import BaseLLMSimpleBlockProcessor
 from marker.processors.llm.llm_meta import LLMSimpleBlockMetaProcessor
 from marker.util import assign_config, download_font
 
+logger = get_logger()
 
 class BaseConverter:
     def __init__(self, config: Optional[BaseModel | dict] = None):
@@ -35,6 +37,9 @@ class BaseConverter:
                 resolved_kwargs[param_name] = self.artifact_dict[param_name]
             elif param.default != inspect.Parameter.empty:
                 resolved_kwargs[param_name] = param.default
+            elif param_name == 'kwargs':
+                logger.info(f"kwargs from config: {self.config}.")
+                resolved_kwargs.update(self.config)
             else:
                 raise ValueError(f"Cannot resolve dependency for parameter: {param_name}")
 
