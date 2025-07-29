@@ -217,6 +217,12 @@ class CommonParams(BaseModel):
             description="this uses the Azure OpenAI service. You can configure --azure_endpoint, --azure_api_key, and --deployment_name. To use it, set --llm_service=marker.services.azure_openai.AzureOpenAIService."
         ),
     ] = None
+    timeout: Annotated[
+        Optional[int],
+        Field(
+            description="The timeout to use for the service."
+        ),
+    ] = 60
 
     @classmethod
     def as_form(cls,
@@ -247,7 +253,8 @@ class CommonParams(BaseModel):
                 openai_base_url: Optional[str] = Form(default=None),
                 azure_endpoint: Optional[str] = Form(default=None),
                 azure_api_key: Optional[str] = Form(default=None),
-                deployment_name: Optional[str] = Form(default=None)):
+                deployment_name: Optional[str] = Form(default=None),
+                timeout: Optional[int] = Form(default=60)):
         return cls(
             page_range=page_range,
             force_ocr=force_ocr,
@@ -276,7 +283,8 @@ class CommonParams(BaseModel):
             openai_base_url=openai_base_url,
             azure_endpoint=azure_endpoint,
             azure_api_key=azure_api_key,
-            deployment_name=deployment_name
+            deployment_name=deployment_name,
+            timeout=timeout
         )
 
 
